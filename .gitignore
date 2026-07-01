@@ -1,0 +1,32 @@
+# Directorio de configuración de Claude (NUNCA subir)
+.claude/
+
+# Archivos y carpetas del proyecto pdf_to_markdown
+# NOTA: /examples se excluye expresamente abajo
+
+# Archivos Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Entornos virtuales
+venv/
+env/
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PDF input/output examples (NO subir - son datos de prueba)
+pdf_to_markdown/examples/
+
+# Logs
+*.log
