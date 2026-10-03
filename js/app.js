@@ -747,7 +747,10 @@ function renderCardPersona(persona) {
                     <button class="btn-remove btn-delete-persona" data-email="${escapeHtml(persona.email)}" title="Eliminar persona">×</button>
                 </div>
             </div>
-            <div class="persona-card-email">${escapeHtml(persona.email)}</div>
+            <div class="persona-card-email">
+                <span>${escapeHtml(persona.email)}</span>
+                <button class="btn-icon btn-copy" data-copy="${escapeHtml(persona.email)}" title="Copiar email"><i class="ph ph-copy"></i></button>
+            </div>
             <div class="persona-card-extra">
                 ${vehiculoIcon ? `<span class="persona-card-info">${vehiculoIcon}</span>` : ''}
                 ${persona.poblacion ? `<span class="persona-card-info">📍 ${escapeHtml(persona.poblacion)}</span>` : ''}
@@ -789,7 +792,7 @@ function renderCardEmpresa(empresa, personasAsignadas) {
                 </div>
             </div>
             ${empresa.responsable ? `<div class="empresa-card-responsible">👤 ${escapeHtml(empresa.responsable)}</div>` : ''}
-            ${empresa.email ? `<div class="empresa-card-email">✉️ ${escapeHtml(empresa.email)}</div>` : ''}
+            ${empresa.email ? `<div class="empresa-card-email">✉️ <span>${escapeHtml(empresa.email)}</span><button class="btn-icon btn-copy" data-copy="${escapeHtml(empresa.email)}" title="Copiar email"><i class="ph ph-copy"></i></button></div>` : ''}
             ${empresa.direccion ? `<div class="empresa-card-address">📍 ${escapeHtml(empresa.direccion)}</div>` : ''}
             ${empresa.requisitos ? `<div class="empresa-card-requirements">📋 Requisitos: ${escapeHtml(empresa.requisitos)}</div>` : ''}
             ${empresa.anotaciones ? `<div class="empresa-card-anotaciones" title="${escapeHtml(empresa.anotaciones)}">📝 ${escapeHtml(empresa.anotaciones)}</div>` : ''}
@@ -1374,6 +1377,12 @@ const APP = {
             if (e.target.classList.contains('btn-edit-empresa') || e.target.closest('.btn-edit-empresa')) {
                 const btn = e.target.closest('.btn-edit-empresa');
                 handleEditEmpresa(btn.dataset.empresa);
+            }
+            if (e.target.classList.contains('btn-copy') || e.target.closest('.btn-copy')) {
+                const btn = e.target.closest('.btn-copy');
+                navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+                    showToast('Copiado al portapapeles', 'success');
+                });
             }
         });
 

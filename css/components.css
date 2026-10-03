@@ -150,6 +150,9 @@
   font-size: 12px;
   color: var(--color-text-secondary);
   margin-left: 28px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
 }
 
 .persona-card-vehicle {
@@ -294,6 +297,9 @@
   font-size: 12px;
   color: var(--color-text-secondary);
   margin-left: 28px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
 }
 
 .empresa-card-address {
@@ -366,6 +372,27 @@
 }
 
 .empresa-card-actions .btn-icon:hover {
+  background-color: var(--color-bg);
+  color: var(--color-primary);
+}
+
+.btn-copy {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 12px;
+  transition: all var(--transition-fast);
+  padding: 0;
+}
+
+.btn-copy:hover {
   background-color: var(--color-bg);
   color: var(--color-primary);
 }
