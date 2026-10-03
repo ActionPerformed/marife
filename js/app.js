@@ -792,7 +792,6 @@ function renderCardEmpresa(empresa, personasAsignadas) {
             ${empresa.email ? `<div class="empresa-card-email">✉️ ${escapeHtml(empresa.email)}</div>` : ''}
             ${empresa.direccion ? `<div class="empresa-card-address">📍 ${escapeHtml(empresa.direccion)}</div>` : ''}
             ${empresa.requisitos ? `<div class="empresa-card-requirements">📋 Requisitos: ${escapeHtml(empresa.requisitos)}</div>` : ''}
-            ${empresa.vehiculo ? `<div class="empresa-card-info">🚗 Vehículo disponible</div>` : ''}
             ${empresa.anotaciones ? `<div class="empresa-card-anotaciones" title="${escapeHtml(empresa.anotaciones)}">📝 ${escapeHtml(empresa.anotaciones)}</div>` : ''}
             <div class="empresa-card-capacidad">
                 <span class="capacidad-item ${class1}">1º: ${icon1}${count1}/${cap1}</span>
