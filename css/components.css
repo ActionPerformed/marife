@@ -326,13 +326,11 @@
 .empresa-card-anotaciones {
   font-size: 11px;
   color: var(--color-text-secondary);
-  margin-left: 28px;
   margin-top: var(--space-xs);
   padding: var(--space-xs);
   background-color: var(--color-bg);
   border-radius: 4px;
   font-style: italic;
-  max-width: 250px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
