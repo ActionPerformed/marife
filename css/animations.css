@@ -1,0 +1,133 @@
+/* Drag elevation animation */
+@keyframes drag-elevation {
+  0% {
+    transform: scale(1);
+    box-shadow: var(--shadow-sm);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-xl);
+    opacity: 0.9;
+  }
+}
+
+/* Drop pegado effect */
+@keyframes drop-pegado {
+  0% {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-xl);
+  }
+  50% {
+    transform: scale(0.98);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+/* Pulsing drop target */
+@keyframes pulse-drop {
+  0% {
+    border-color: var(--color-secondary);
+    background-color: transparent;
+  }
+  50% {
+    border-color: var(--color-secondary);
+    background-color: rgba(139, 92, 246, 0.15);
+  }
+  100% {
+    border-color: var(--color-secondary);
+    background-color: rgba(139, 92, 246, 0.1);
+  }
+}
+
+/* Utility animation classes */
+.fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+@keyframes slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.shake {
+  animation: shake 0.4s ease-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px);
+  }
+}
+
+/* Card animations */
+.card.dragging {
+  animation: drag-elevation 0.15s ease-out forwards;
+}
+
+.card.drop-pegando {
+  animation: drop-pegado 0.2s ease-out;
+}
+
+/* Transition utilities */
+.transition-all {
+  transition: all var(--transition-normal);
+}
+
+.transition-fast {
+  transition: all var(--transition-fast);
+}
+
+/* Hover lift effect */
+.hover-lift {
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Remove animation */
+.removing {
+  animation: fade-out 0.2s ease-out forwards;
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}

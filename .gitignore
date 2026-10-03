@@ -30,3 +30,10 @@ pdf_to_markdown/examples/
 
 # Logs
 *.log
+
+# Datos de prueba locales
+datos/
+
+# Documentación interna
+requisitos marife.md
+SPEC.md

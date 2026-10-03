@@ -1,300 +1,359 @@
-# PDF to Markdown Converter - Especificación
+# MARIFÉ — Motor de Asignación y Relaciones para la Intermediación entre Formación y Empresa
 
-**Versión:** 1.1.0
-**Fecha:** 2026-06-29
-**Estado:** Parcialmente implementado (funcional)
+## 1. Concepto y Visión
 
----
-
-## Objetivo
-
-Desarrollar un script en Python que convierta archivos PDF a Markdown, preservando la estructura jerárquica, tablas complejas y elementos de formato. Optimizado para artículos científicos y documentos técnicos.
+MARIFÉ es una herramienta local, offline y de alta privacidad para emparejar personas con empresas mediante una interfaz visual de **tarjetas y drag & drop**. La experiencia busca ser **inmediata, táctil y sin fricción**: el usuario arrastra una persona sobre una empresa y la asociación se crea al instante. El tono visual es profesional pero accesible, pensado para usuarios sin formación técnica.
 
 ---
 
-## Requisitos Funcionales
+## 2. Design Language
 
-### 1. Extracción de Texto y Estructura
+### Aesthetic Direction
+Interfaz de **panel de control profesional** — limpia, organizada, con tarjetas como protagonistas. Inspiración en herramientas de gestión de proyectos (Trello, Notion) pero más minimalista.
 
-- [x] **Jerarquía de títulos**: Detectar y mantener niveles de cabecera (H1, H2, H3, H4)
-- [x] **Índices y sumarios**: Preservar la estructura de índices y listas existentes
-- [x] **Numeración**: Mantener numeración de secciones (1., 1.1., 1.1.1., etc.)
-- [x] **Listas**: Mantener listas numeradas y con viñetas
-- [x] **Citas**: Preservar bloques de cita (>)
+### Color Palette
+| Rol | Color | Uso |
+|-----|-------|-----|
+| Background | `#F5F7FA` | Fondo general |
+| Surface | `#FFFFFF` | Tarjetas, paneles |
+| Primary (Personas) | `#3B82F6` | Tarjetas de persona, acentos |
+| Secondary (Empresas) | `#8B5CF6` | Tarjetas de empresa |
+| Success | `#10B981` | Asociación creada |
+| Warning | `#F59E0B` | Discrepancia de requisitos |
+| Danger | `#EF4444` | Eliminar, errores |
+| Text Primary | `#1F2937` | Texto principal |
+| Text Secondary | `#6B7280` | Texto auxiliar |
+| Border | `#E5E7EB` | Bordes de tarjetas |
 
-### 2. Tablas Complejas
+### Typography
+- **Font**: `Inter` (Google Fonts) con fallback `system-ui, sans-serif`
+- **Headings**: 600 weight
+- **Body**: 400 weight
+- **Scale**: 12px / 14px / 16px / 20px / 24px
 
-- [x] **Celdas fusionadas**: Soporte para colspan y rowspan (flattening a celdas simples)
-- [x] **Tablas sin bordes**: Detectar tablas definidas solo por alineación
-- [x] **Múltiples tablas por página**: Extraer todas las tablas independientemente de su ubicación
-- [x] **Encabezados de tabla**: Identificar y marcar filas de encabezado
-- [x] **Pies de tabla**: Preservar notas y leyendas asociadas a tablas
-- [x] **Estrategia**: Uso de pdfplumber para extracción
-- [x] **Saltos de línea en celdas**: Los saltos de línea internos se reemplazan por espacios
+### Spatial System
+- Grid base: 8px
+- Padding tarjetas: 16px
+- Gap entre tarjetas: 12px
+- Border radius: 12px
 
-### 3. Formato de Texto
+### Motion Philosophy
+- **Drag**: elevación con `box-shadow` + `scale(1.02)` + `opacity 0.9`
+- **Drop**: animación de "pegado" con `transition 200ms ease-out`
+- **Hover tarjetas**: `box-shadow` elevado + borde coloreado
+- **Feedback de drop válido**: highlight del área destino durante 300ms
+- **Transiciones de estado**: 150ms ease
 
-- [x] **Bloques de código**: Detectar y preservar bloques de código con su lenguaje
-- [x] **Listas y citas**: Preservar formato de listas y citas del PDF
-
-> **Nota**: La preservación de negritas, cursivas y código inline basada en análisis de fuentes del PDF no está implementada de forma robusta. El texto se extrae en formato plano.
-
-### 4. Notas al Pie
-
-- [x] **Supresión**: Las notas al pie no se incluyen en el flujo del texto
-- [x] **Aviso**: Al final del documento se incluirá el texto: *"Las notas a pie de página de este documento no se han transcrito"*
-
-### 5. Imágenes
-
-- [x] **Ignoradas**: Las imágenes del PDF se ignoran, no se extraen
-
-### 6. Encabezados y Pies de Página Repetidos
-
-- [ ] **Detección automática**: Se detectan textos de encabezado/pie que se repiten en múltiples páginas
-- [ ] **Filtrado**: Los textos repetidos (como "BOLETÍN OFICIAL DEL ESTADO - Núm. XXX") se ignoran en la salida
-
-> **Nota**: Esta funcionalidad fue diseñada pero no implementada debido a la complejidad de detectar patrones variables (números de página, fechas) de forma robusta.
+### Visual Assets
+- Iconos: **Phosphor Icons** (CDN) — estilo `regular`
+- Persona: 👤 (emoji) o icono genérico
+- Empresa: 🏢 (emoji) o icono genérico
+- Sin vehículo: 🚗 (solo icono rojo)
+- Con vehículo: 🚗 (verde) — usar color del icono, no emoji diferente
 
 ---
 
-## Requisitos Técnicos
+## 3. Layout & Structure
 
-### Librerías y Dependencias
-
-```txt
-# Extracción de texto y tablas
-pdfplumber>=0.10.0
-
-# CLI y utilidades
-click>=8.1.0
-markdown>=3.5.0
-python-dotenv>=1.0.0
-
-# Logging y progreso
-colorama>=0.4.6
-tqdm>=4.65.0
-```
-
-### Estructura del Proyecto
+### Área Principal (3 columnas)
 
 ```
-pdf_to_markdown/
-├── main.py                  # Punto de entrada CLI
-├── requirements.txt
-├── SPEC.md                  # Este documento
-│
-├── core/
-│   ├── __init__.py
-│   ├── pdf_processor.py     # Orquestador principal
-│   ├── text_extractor.py    # Extracción de texto y formato
-│   ├── table_extractor.py   # Extracción de tablas
-│   └── structure_detector.py # Detección de jerarquía y títulos
-│
-├── utils/
-│   ├── __init__.py
-│   ├── markdown_builder.py  # Construcción de Markdown
-│   ├── logger.py           # Sistema de logging
-│   ├── validators.py        # Validación de salida
-│   └── sanitizers.py        # Limpieza de texto
-│
-└── tests/
-    ├── __init__.py
-    └── test_basic.py
+┌─────────────────────────────────────────────────────────────────┐
+│  HEADER: Logo + Título + Botones de acción                      │
+├──────────────┬──────────────────────────┬───────────────────────┤
+│              │                          │                       │
+│  PERSONAS    │   EMPRESAS              │   ASIGNACIONES        │
+│  (sin asig.) │   (con personas         │   (resumen visual     │
+│              │    pegadas)             │    de cada empresa)   │
+│              │                          │                       │
+│  [tarjeta]   │   [tarjeta empresa]     │                       │
+│  [tarjeta]   │     [persona][persona]  │                       │
+│  [tarjeta]   │                          │   Empresa A           │
+│              │   [tarjeta empresa]     │     → Ana López       │
+│              │     [persona]           │     → Pedro Ruiz      │
+│              │                          │                       │
+└──────────────┴──────────────────────────┴───────────────────────┘
 ```
 
+### Panel de diálogo (overlay)
+
+Aparece centrado con backdrop semitransparente:
+- **Modal de mapeo de columnas** (al cargar CSV)
+- **Modal de confirmación** (carga con datos existentes, eliminar empresa con asignaciones)
+- **Modal de errores** (CSV rechazado)
+
+### Responsive Strategy
+- **Desktop (>1024px)**: 3 columnas side-by-side
+- **Tablet (768-1024px)**: 2 columnas (personas + empresas), panel de asignaciones colapsable
+- **Móvil (<768px)**: 1 columna con tabs (no prioritario — RNF indica navegadores modernos de escritorio)
+
 ---
 
-## Interfaz de Línea de Comandos (CLI)
+## 4. Features & Interactions
 
-### Uso
+### 4.1 Carga de CSV — Personas
 
-```bash
-# Uso básico
-python main.py documento.pdf
+**Flujo:**
+1. Usuario pulsa "Cargar Personas" (o arrastra fichero al área designada)
+2. Si ya existen personas con asignaciones → **modal de confirmación**:
+   - "Esto desemparejará a X personas. ¿Continuar?"
+   - Botones: Cancelar / Confirmar
+3. Usuario ve **modal de mapeo de columnas**:
+   - Lista de campos requeridos a la izquierda (Nombre, Email, Vehículo, Población)
+   - Selectores a la derecha con las columnas detectadas del CSV
+   - Primera fila (cabeceras) visible como referencia
+4. Usuario acepta → se procesa el CSV
+5. **Si errores** → modal con lista de motivos (ej: "Fila 3: email vacío", "Fila 7: formato desconocido")
+6. **Si éxito** → tarjetas de persona aparecen en columna izquierda, panel de asignaciones se actualiza
 
-# Con opciones
-python main.py documento.pdf --output resultado.md --verbose
+**Validación de CSV:**
+- Fichero vacío → error
+- Sin cabecera → error
+- Campos requeridos ausentes en mapeo → error
+- Email duplicado en el mismo CSV → se ignora la segunda occurrence (sin avisar)
 
-# Procesamiento por lotes
-python main.py --batch "*.pdf" --output-dir ./markdowns/
+### 4.2 Carga de CSV — Empresas
+
+Mismo flujo que personas, pero con campos:
+- Nombre de empresa (requerido)
+- Responsable (requerido)
+- Email responsable (requerido)
+- Dirección (opcional)
+- Requisitos adicionales (opcional, texto libre)
+
+### 4.3 Asignación mediante Drag & Drop
+
+**Desde persona a empresa:**
+1. Usuario arrastra tarjeta de persona
+2. La tarjeta se eleva visualmente
+3. Al pasar sobre una empresa → la zona de drop de esa empresa se resalta
+4. Al soltar sobre empresa → la persona se "pega" a la empresa (dentro de su tarjeta)
+5. Si la persona ya estaba asignada a otra empresa → se desvincula automáticamente
+
+**Desde empresa a persona:**
+1. Usuario arrastra la empresa (o su grupo de personas) para reasignar
+2. La persona desvinculada pasa a estar "suelta"
+3. Se puede soltar sobre otra empresa
+
+**Personas sin asignar:** Viven en la columna izquierda. Se muestran siempre en orden de carga.
+
+**Empresas con personas asignadas:** Las personas aparecen dentro/pegadas a la tarjeta de la empresa en la columna central.
+
+### 4.4 Desasignación
+
+- **Botón "×" en cada persona asignada** dentro de la tarjeta de empresa
+- Al pulsar → la persona vuelve a la columna de personas sin asignar
+- No requiere confirmación (acción menor, reversible con CTRL+Z)
+
+### 4.5 Eliminar empresa
+
+- Botón de eliminar en cada tarjeta de empresa (solo si no tiene personas asignadas directamente)
+- Si tiene personas → botón deshabilitado + tooltip "Desasigna primero las personas"
+- **Alternativa**: Modal de confirmación si se quiere forzar eliminación con personas → las personas quedan desasignadas
+
+### 4.6 Exportación de asignaciones
+
+**CSV de asignaciones:**
+```
+empresa,persona,email
+Empresa A,Ana López,ana@correo.es
+Empresa A,Pedro Ruiz,pedro@correo.es
+Empresa B,Lucía Díaz,lucia@correo.es
 ```
 
-### Parámetros
+Botón "Exportar Asignaciones" → descarga `asignaciones_YYYY-MM-DD.csv`
 
-| Opción             | Descripción                              | Default            |
-|--------------------|------------------------------------------|--------------------|
-| `pdf_path`         | Ruta del archivo PDF de entrada          | Obligatorio        |
-| `--output`, `-o`  | Ruta del archivo Markdown de salida     | `[nombre].md`      |
-| `--verbose`, `-v`  | Mostrar progreso detallado              | False              |
-| `--batch`          | Patrón glob para procesar múltiples PDFs | False              |
-| `--output-dir`     | Directorio de salida para batch         | `./output/`        |
+### 4.7 Guardar / Cargar sesión (JSON)
 
----
+**Guardar sesión:**
+Botón "Guardar Sesión" → descarga `marife_sesion_YYYY-MM-DD.json`
 
-## Formato de Salida
-
-### Estructura Markdown
-
-```markdown
-# 1. INTRODUCCIÓN
-
-El cambio climático es un fenómeno global que afecta...
-
-**Palabras clave**: clima, sostenibilidad, emisiones
-
-## 1.1. Antecedentes
-
-*Según el IPCC (2023)*, las emisiones de gases...
-
-### Tabla 1: Emisiones por Sector (2020-2023)
-
-| Sector     | 2020 | 2021 | 2022 | 2023 |
-|------------|------|------|------|------|
-| Energía    | 45.2 | 44.8 | 43.1 | 42.5 |
-| Transporte | 28.1 | 29.3 | 30.2 | 31.0 |
-| Industria  | 18.5 | 18.9 | 19.4 | 19.8 |
-| **Total**  | **91.8** | **93.0** | **92.7** | **93.3** |
-
-*Fuente: Agencia Internacional de Energía (2024)*
-
-## 1.2. Metodología
-
-```python
-def calculate_emissions(data):
-    return sum(data) / len(data)
+El JSON contiene:
+```json
+{
+  "version": "1.0",
+  "fecha": "2026-10-01T10:30:00",
+  "personas": [...],
+  "empresas": [...],
+  "asignaciones": [
+    { "personaEmail": "...", "empresaNombre": "..." }
+  ]
+}
 ```
 
-> "La reducción de emisiones es crítica para evitar..."
+**Cargar sesión:**
+Botón "Cargar Sesión" → selector de fichero JSON
+- Si ya hay datos → modal de confirmación (como en CSV)
+- Se restaura todo el estado completo
 
-Las notas a pie de página de este documento no se han transcrito.
+### 4.8 Deshacer / Rehacer
+
+- **CTRL+Z**: deshace la última acción (asignación, desasignación, eliminación)
+- **CTRL+Y** o **CTRL+Shift+Z**: rehace
+- Pila de hasta 50 acciones
+- Acciones registrables: crear asignación, eliminar asociación, cargar datos (personas/empresas), eliminar empresa
+
+### 4.9 Marcado de discrepancias de requisitos (futuro – MVP solo marca)
+
+Cuando se implemente la lectura de requisitos:
+- Si la empresa tiene campo `requisitos` y la persona tiene datos de idiomas/carnés
+- Se marca visualmente (badge de advertencia en la persona asignada)
+- No se bloquea la asignación
+
+---
+
+## 5. Component Inventory
+
+### 5.1 Tarjeta de Persona
+
+```
+┌─────────────────────────────┐
+│ 👤  Ana López              │
+│      ana@correo.es         │
+│      🚗 Oviedo             │
+└─────────────────────────────┘
 ```
 
----
+| Estado | Appearance |
+|--------|------------|
+| Default | Borde `#E5E7EB`, fondo blanco |
+| Hover | Borde `#3B82F6`, shadow elevada |
+| Dragging | Scale 1.02, shadow máxima, opacity 0.9 |
+| Asignada | No cambia visualmente (por ahora) |
 
-## Requisitos No Funcionales
+### 5.2 Tarjeta de Empresa
 
-### Rendimiento
-
-- Tiempo de procesamiento: < 30 segundos para PDF de 50 páginas
-- Memoria: < 512 MB RAM para documentos grandes
-- Escalabilidad: Capacidad para procesar 20-25 PDFs en lote
-
-### Calidad
-
-- Precisión de tablas: > 90% de conversión correcta
-- Fidelidad estructural: Mantener 100% de la jerarquía original
-- Literalidad: No perder ningún contenido del texto
-- Formato: Preservar negritas, cursivas, código inline y bloques de código
-
-### Usabilidad
-
-- Mensajes de error claros y accionables
-- Barras de progreso para procesos largos
-- Logging con niveles (DEBUG, INFO, WARNING, ERROR)
-- Compatibilidad cross-platform (Windows, Linux, macOS)
-
-### Mantenibilidad
-
-- Docstrings en todas las funciones
-- Type hints en Python
-- Modularidad: componentes independientes
-- Configuración mediante argumentos de línea de comandos
-
----
-
-## Casos de Prueba
-
-1. **PDF con Tabla Compleja**: Tabla con celdas fusionadas (colspan/rowspan)
-2. **Artículo Científico**: Títulos numerados, figuras y tablas de datos
-3. **PDF con Código**: Bloques de código con lenguaje especificado
-4. **PDF con Listas**: Listas numeradas y con viñetas
-5. **PDF con Citas**: Bloques de cita (>)
-6. **PDF con Saltos de Línea en Tablas**: Celdas con texto multilínea
-
----
-
-## Criterios de Aceptación
-
-1. ✅ El script convierte cualquier PDF a Markdown sin pérdida de contenido
-2. ✅ Las tablas con celdas fusionadas se convierten correctamente
-3. ✅ Los títulos mantienen su nivel estructural
-4. ✅ El formato de texto (negritas, cursivas, código) se preserva
-5. ✅ Las notas al pie se eliminan y se añade el aviso al final
-6. ✅ Las imágenes se ignoran sin afectar la conversión
-7. ✅ Los saltos de línea dentro de celdas de tabla se convierten a espacios
-8. ✅ Rendimiento: Procesa un PDF de 50 páginas en < 30 segundos
-9. ✅ Robustez: Maneja errores sin fallar completamente
-10. ✅ La CLI es intuitiva y bien documentada
-11. ✅ El Markdown generado es válido y bien formateado
-12. ✅ Funciona en Windows, Linux y macOS
-
----
-
-## Dependencias del Sistema
-
-### Linux/Ubuntu
-
-```bash
-sudo apt-get update && sudo apt-get install -y poppler-utils
+```
+┌─────────────────────────────────────┐
+│ 🏢  Empresa A                  [×] │
+│      María Pérez                   │
+│      maria@empresa.es              │
+│      Calle Mayor 1                 │
+│      Requisitos: Inglés B1         │
+│  ┌─────┐ ┌─────┐                   │
+│  │👤 Ana│ │👤 Pedro│              │
+│  └─────┘ └─────┘                   │
+└─────────────────────────────────────┘
 ```
 
-### macOS
+| Estado | Appearance |
+|--------|------------|
+| Default | Borde `#E5E7EB`, fondo blanco |
+| Hover | Borde `#8B5CF6`, shadow elevada |
+| Drop target activo | Borde `#8B5CF6` pulsante, fondo `#F3E8FF` |
+| Con personas | Muestra personas pegadas debajo de info |
 
-```bash
-brew install poppler
+### 5.3 Modal de Confirmación
+
+- Backdrop oscuro (rgba(0,0,0,0.5))
+- Caja blanca centrada, max-width 480px
+- Título + mensaje + botones (Cancelar / Confirmar)
+- Botón peligroso en rojo (`#EF4444`)
+
+### 5.4 Modal de Mapeo de Columnas
+
+- Lista de campos requeridos a la izquierda
+- `<select>` por cada campo mostrando las cabeceras detectadas
+- Primera fila del CSV visible como referencia
+- Botón "Aplicar" / "Cancelar"
+
+### 5.5 Toast / Notificación
+
+- Aparece en esquina inferior derecha
+- Tipos: success (verde), error (rojo), info (azul)
+- Auto-dismiss tras 4 segundos
+- Acción opcional: "Deshacer"
+
+---
+
+## 6. Technical Approach
+
+### Stack
+- **HTML5** — estructura semántica
+- **CSS3** — variables CSS, Grid, Flexbox, animaciones
+- **JavaScript (ES6+)** — sin frameworks, vanilla puro
+- **Phosphor Icons** — CDN
+- **Inter font** — Google Fonts CDN
+
+### Arquitectura de archivos
+
+```
+/
+├── index.html              # Punto de entrada, layout principal
+├── css/
+│   ├── reset.css           # Normalize/reset básico
+│   ├── variables.css      # Variables CSS (colores, espaciado)
+│   ├── layout.css         # Grid y estructura de columnas
+│   ├── components.css     # Estilos de tarjetas, modales, botones
+│   └── animations.css     # Transiciones y animaciones
+├── js/
+│   ├── app.js             # Inicialización, estado global
+│   ├── state.js           # Gestión de estado + undo/redo stack
+│   ├── csv.js             # Parseo y validación de CSV
+│   ├── mapping.js         # Lógica de mapeo de columnas
+│   ├── dragdrop.js        # Drag & drop interactions
+│   ├── render.js          # Renderizado de tarjetas y UI
+│   ├── export.js          # Exportación CSV y JSON
+│   └── dom.js             # Utilidades de manipulación DOM
+└── SPEC.md
 ```
 
-### Windows
+### Estado de la aplicación (state.js)
 
-- Instalar poppler: https://github.com/oschwartz10612/poppler-windows/releases/
+```javascript
+{
+  personas: Map<email, Persona>,
+  empresas: Map<nombre, Empresa>,
+  asignaciones: Map<emailPersona, nombreEmpresa>,
+  pilaAcciones: Array<{ type, payload, undo }>,  // para undo/redo
+  punteroAccion: number                           // posición actual
+}
+```
 
----
+### API de datos
 
-## Limitaciones Conocidas
+Sin backend — toda la información vive en memoria del navegador.
 
-- Tablas extremadamente complejas pueden requerir ajuste manual
-- El texto superpuesto a imágenes puede no extraerse correctamente
-- PDFs con fuentes muy personalizadas pueden perder algo de formato
-- Celdas de tabla con contenido muy extenso pueden no renderizarse perfectamente en Markdown
+- **Carga CSV** → `csv.js` parsea, `mapping.js` aplica mapeo, `app.js` actualiza estado
+- **Guardado sesión** → `export.js` serializa estado a JSON y fuerza descarga
+- **Carga sesión** → `export.js` lee JSON, `app.js` restaura estado
+- **Exportación** → `export.js` genera CSV de asignaciones
 
----
+### Drag & Drop
 
-## Estado de Implementación
+Usar **HTML5 Drag and Drop API** nativa:
+- `draggable="true"` en tarjetas de persona
+- `dragstart`, `dragover`, `drop`, `dragend` eventos
+- `dataTransfer` para pasar el email de la persona
 
-### Fase 1: Fundación ✅
-- [x] Configurar estructura de proyecto
-- [x] Instalar dependencias
-- [x] Implementar CLI básico con Click
-- [x] Configurar sistema de logging
+### Dependencias externas (CDN)
 
-### Fase 2: Extracción Base ✅
-- [x] Implementar extracción de texto con pdfplumber
-- [x] Detectar y clasificar títulos
-- [x] Preservar formato básico (negritas, cursivas)
+```html
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web@2.0.3"></script>
+```
 
-### Fase 3: Tablas ✅
-- [x] Extraer tablas con pdfplumber
-- [x] Manejar celdas fusionadas (flattening)
-- [x] Convertir tablas a Markdown (GFM)
-- [x] Corregir saltos de línea en celdas
-
-### Fase 4: Estructura Avanzada ✅
-- [x] Preservar listas y citas
-- [x] Manejar notas al pie (supresión + aviso)
-- [x] Preservar bloques de código
-- [ ] Filtrar encabezados/pies repetidos (abandonado)
-
-### Fase 5: Limpieza y Validación ✅
-- [x] Sanitizar salida (saltos de línea, espacios)
-- [x] Validar Markdown generado
-- [x] Logging y manejo de errores
+### Limitaciones de volumen
+- **40 personas + 40 empresas** — muy por debajo de umbrales de rendimiento problemáticos
+- No se requiere virtualización de DOM
 
 ---
 
-## Pendiente de Implementar
+## 7. Criterios de Aceptación
 
-- [ ] Detección automática de lenguaje de bloques de código
-- [ ] Pruebas unitarias completas
-- [ ] Documentación README.md completa
-
-> **Abandonado**: Filtrado de encabezados/pies de página repetidos - No viable con la detección actual debido a la complejidad de manejar patrones variables (números de página, fechas) de forma robusta.
+- [ ] Cargar CSV de personas con mapeo manual de columnas
+- [ ] Cargar CSV de empresas con mapeo manual de columnas
+- [ ] Confirmación antes de reemplazar datos existentes
+- [ ] Rechazo de CSV con errores claros
+- [ ] Mostrar tarjetas de persona y empresa diferenciadas visualmente
+- [ ] Drag & drop de persona sobre empresa = asignación
+- [ ] Una persona solo puede estar en una empresa
+- [ ] Varias personas pueden estar en la misma empresa
+- [ ] Desasignar persona (botón ×) la devuelve a columna izquierda
+- [ ] Eliminar empresa con personas → confirmación + desasignación
+- [ ] CTRL+Z deshace última acción
+- [ ] CTRL+Y / CTRL+Shift+Z rehace
+- [ ] Exportar asignaciones a CSV
+- [ ] Guardar sesión completa en JSON
+- [ ] Cargar sesión desde JSON
+- [ ] Funciona en Chrome, Edge, Firefox sin componentes adicionales
