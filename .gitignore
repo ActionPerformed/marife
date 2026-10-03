@@ -25,9 +25,6 @@ env/
 .DS_Store
 Thumbs.db
 
-# PDF input/output examples (NO subir - son datos de prueba)
-pdf_to_markdown/examples/
-
 # Logs
 *.log
 
