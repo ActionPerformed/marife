@@ -499,7 +499,7 @@ function detectColumns(csvText) {
 // === SECCIÓN 4: MAPEO DE COLUMNAS (mapping.js) ===============================
 // =============================================================================
 
-const PERSONAS_FIELDS = ['nombre', 'email', 'vehiculo', 'poblacion', 'curso'];
+const PERSONAS_FIELDS = ['nombre', 'email', 'vehiculo', 'poblacion', 'curso', 'anotaciones'];
 const EMPRESAS_REQUIRED_FIELDS = ['nombre', 'responsable', 'email'];
 const EMPRESAS_OPTIONAL_FIELDS = ['direccion', 'requisitos', 'capacidad_1', 'capacidad_2', 'vehiculo', 'anotaciones'];
 
