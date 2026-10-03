@@ -1198,15 +1198,8 @@ function escapeCSV(value) {
 }
 
 function exportAssignmentsCSV() {
-    const rows = [['empresa', 'persona', 'email']];
-    for (const [emailPersona, nombreEmpresa] of state.asignaciones) {
-        const persona = state.personas.get(emailPersona);
-        if (persona) {
-            rows.push([escapeCSV(nombreEmpresa), escapeCSV(persona.nombre), escapeCSV(emailPersona)]);
-        }
-    }
-    const csv = rows.map(row => row.join(',')).join('\n');
-    downloadFile(csv, 'asignaciones.csv', 'text/csv;charset=utf-8');
+    // Exportar asignaciones ya no es necesario - la sesión JSON cubre esta funcionalidad
+    showToast('Usa Guardar Sesión para exportar todos los datos', 'info');
 }
 
 function exportPersonasCSV() {
