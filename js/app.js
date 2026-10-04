@@ -499,13 +499,14 @@ function detectColumns(csvText) {
 // === SECCIÓN 4: MAPEO DE COLUMNAS (mapping.js) ===============================
 // =============================================================================
 
-const PERSONAS_FIELDS = ['nombre', 'email', 'vehiculo', 'poblacion', 'curso', 'anotaciones'];
+const PERSONAS_REQUIRED_FIELDS = ['nombre', 'email'];
+const PERSONAS_OPTIONAL_FIELDS = ['vehiculo', 'poblacion', 'curso', 'anotaciones'];
 const EMPRESAS_REQUIRED_FIELDS = ['nombre', 'responsable', 'email'];
 const EMPRESAS_OPTIONAL_FIELDS = ['direccion', 'requisitos', 'capacidad_1', 'capacidad_2', 'vehiculo', 'anotaciones'];
 
 function getRequiredFields(tipo) {
     switch (tipo) {
-        case 'personas': return [...PERSONAS_FIELDS];
+        case 'personas': return [...PERSONAS_REQUIRED_FIELDS];
         case 'empresas': return [...EMPRESAS_REQUIRED_FIELDS];
         default: throw new Error(`Unknown type: ${tipo}`);
     }
@@ -513,7 +514,7 @@ function getRequiredFields(tipo) {
 
 function getAllFields(tipo) {
     switch (tipo) {
-        case 'personas': return [...PERSONAS_FIELDS];
+        case 'personas': return [...PERSONAS_REQUIRED_FIELDS, ...PERSONAS_OPTIONAL_FIELDS];
         case 'empresas': return [...EMPRESAS_REQUIRED_FIELDS, ...EMPRESAS_OPTIONAL_FIELDS];
         default: throw new Error(`Unknown type: ${tipo}`);
     }
