@@ -1452,6 +1452,7 @@ const APP = {
 
         // Mapping fields
         const allFields = getAllFields(tipo);
+        const requiredFields = getRequiredFields(tipo);
         clearChildren(fieldsContainer);
 
         for (const field of allFields) {
@@ -1460,7 +1461,8 @@ const APP = {
 
             const label = document.createElement('label');
             label.className = 'mapping-field-label';
-            label.textContent = getFieldLabels(tipo)[field] || field;
+            const isRequired = requiredFields.includes(field);
+            label.innerHTML = `${getFieldLabels(tipo)[field] || field}${isRequired ? ' <span class="required">*</span>' : ''}`;
             label.htmlFor = `mapping-${field}`;
 
             const select = document.createElement('select');
@@ -1515,9 +1517,11 @@ const APP = {
             const value = select.value;
             mapping[field] = value;
         }
-        for (const select of selects) {
-            if (!select.value) {
-                showToast(`Por favor, selecciona una columna para "${getFieldLabels(this.currentMapping.tipo)[select.dataset.field]}"`, 'error');
+        // Only validate required fields
+        const requiredFields = getRequiredFields(this.currentMapping.tipo);
+        for (const field of requiredFields) {
+            if (!mapping[field] || mapping[field] === '') {
+                showToast(`Por favor, selecciona una columna para "${getFieldLabels(this.currentMapping.tipo)[field]}"`, 'error');
                 return;
             }
         }
