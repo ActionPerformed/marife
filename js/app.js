@@ -1533,17 +1533,9 @@ const APP = {
             if (!result.valid) { this.showErrorModal(result.error); return; }
 
             if (this.currentMapping.tipo === 'personas') {
-                if (state.personas.size > 0) {
-                    this.showConfirmModal('Cargar personas', `Se reemplazarán ${state.personas.size} personas existentes. ¿Continuar?`, () => this.loadPersonasData(result.mappedData));
-                } else {
-                    this.loadPersonasData(result.mappedData);
-                }
+                this.loadPersonasData(result.mappedData);
             } else {
-                if (state.empresas.size > 0) {
-                    this.showConfirmModal('Cargar empresas', `Se reemplazarán ${state.empresas.size} empresas existentes. ¿Continuar?`, () => this.loadEmpresasData(result.mappedData));
-                } else {
-                    this.loadEmpresasData(result.mappedData);
-                }
+                this.loadEmpresasData(result.mappedData);
             }
         } catch (err) {
             showToast(`Error procesando CSV: ${err.message}`, 'error');
@@ -1551,27 +1543,36 @@ const APP = {
     },
 
     loadPersonasData(personas) {
-        state.personas.clear();
-        state.asignaciones.clear();
+        let added = 0;
         for (const persona of personas) {
-            if (persona.nombre && persona.email) addPersona(persona);
+            if (persona.nombre && persona.email) {
+                if (!state.personas.has(persona.email)) {
+                    addPersona(persona);
+                    added++;
+                }
+            }
         }
         renderAll();
+        showToast(`${added} personas añadidas`, 'success');
         setupInteractionHandlers();
         saveToStorage();
         showToast(`${personas.length} personas cargadas`, 'success');
     },
 
     loadEmpresasData(empresas) {
-        state.empresas.clear();
-        state.asignaciones.clear();
+        let added = 0;
         for (const empresa of empresas) {
-            if (empresa.nombre) addEmpresa(empresa);
+            if (empresa.nombre) {
+                if (!state.empresas.has(empresa.nombre)) {
+                    addEmpresa(empresa);
+                    added++;
+                }
+            }
         }
         renderAll();
         setupInteractionHandlers();
         saveToStorage();
-        showToast(`${empresas.length} empresas cargadas`, 'success');
+        showToast(`${added} empresas añadidas`, 'success');
     },
 
     showConfirmModal(title, message, onConfirm) {
