@@ -1072,8 +1072,8 @@ function buildFormFields(tipo, data = null) {
             <div class="form-group"><label>Email *</label><input type="email" id="fg-email" required value="${escapeHtml(d.email || '')}"></div>
             <div class="form-group"><label>Dirección</label><input type="text" id="fg-direccion" value="${escapeHtml(d.direccion || '')}"></div>
             <div class="form-group"><label>Requisitos</label><input type="text" id="fg-requisitos" value="${escapeHtml(d.requisitos || '')}"></div>
-            <div class="form-group"><label>Capacidad 1º</label><input type="number" id="fg-capacidad_1" min="0" value="${d.capacidad_1 || 0}"></div>
-            <div class="form-group"><label>Capacidad 2º</label><input type="number" id="fg-capacidad_2" min="0" value="${d.capacidad_2 || 0}"></div>
+            <div class="form-group"><label>Personas 1º que acoge</label><input type="number" id="fg-capacidad_1" min="0" value="${d.capacidad_1 || 0}"></div>
+            <div class="form-group"><label>Personas 2º que acoge</label><input type="number" id="fg-capacidad_2" min="0" value="${d.capacidad_2 || 0}"></div>
             <div class="form-group"><label>Vehículo</label><select id="fg-vehiculo"><option value="false" ${!d.vehiculo ? 'selected' : ''}>No</option><option value="true" ${d.vehiculo ? 'selected' : ''}>Sí</option></select></div>
             <div class="form-group"><label>Anotaciones</label><textarea id="fg-anotaciones" rows="2">${escapeHtml(d.anotaciones || '')}</textarea></div>
         `;
