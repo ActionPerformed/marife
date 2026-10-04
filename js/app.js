@@ -524,8 +524,101 @@ function getFieldLabels(tipo) {
     if (tipo === 'personas') {
         return { nombre: 'Nombre', email: 'Email', vehiculo: 'Vehículo', poblacion: 'Población', curso: 'Curso', anotaciones: 'Anotaciones' };
     } else {
-        return { nombre: 'Nombre de Empresa', responsable: 'Persona Responsable', email: 'Email de Empresa', direccion: 'Dirección', requisitos: 'Requisitos', capacidad_1: 'Personas 1º que acoge', capacidad_2: 'Personas 2º que acoge', vehiculo: 'Vehículo', anotaciones: 'Anotaciones' };
+        return { nombre: 'Nombre de Empresa', responsable: 'Persona Responsable', email: 'Email de Empresa', direccion: 'Dirección', requisitos: 'Requisitos', capacidad_1: 'Personas 1º que acoger', capacidad_2: 'Personas 2º que acoge', vehiculo: 'Vehículo', anotaciones: 'Anotaciones' };
     }
+}
+
+/**
+ * Normalize string for comparison: lowercase, remove accents, trim
+ */
+function normalizeString(str) {
+    if (!str) return '';
+    return str
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '') // remove accents
+        .replace(/[_\-\s]+/g, '')        // remove underscores, hyphens, spaces
+        .trim();
+}
+
+/**
+ * Calculate similarity between two strings using Jaccard index on character n-grams
+ * Returns a value between 0 and 1
+ */
+function stringSimilarity(str1, str2) {
+    if (!str1 || !str2) return 0;
+    const s1 = normalizeString(str1);
+    const s2 = normalizeString(str2);
+    if (s1 === s2) return 1;
+    if (s1.length < 2 || s2.length < 2) return 0;
+
+    // Create character bigrams
+    const getBigrams = (str) => {
+        const bigrams = new Set();
+        for (let i = 0; i < str.length - 1; i++) {
+            bigrams.add(str.substring(i, i + 2));
+        }
+        return bigrams;
+    };
+
+    const bigrams1 = getBigrams(s1);
+    const bigrams2 = getBigrams(s2);
+
+    // Calculate Jaccard similarity
+    let intersection = 0;
+    for (const bigram of bigrams1) {
+        if (bigrams2.has(bigram)) intersection++;
+    }
+    const union = bigrams1.size + bigrams2.size - intersection;
+
+    return union > 0 ? intersection / union : 0;
+}
+
+/**
+ * Auto-map CSV headers to application fields based on similarity
+ * Returns an object with field -> header mappings
+ */
+function autoMapColumns(csvHeaders, appFields, threshold = 0.6) {
+    const mapping = {};
+    const usedHeaders = new Set();
+
+    // First pass: exact matches (after normalization)
+    for (const field of appFields) {
+        const normalizedField = normalizeString(field);
+        for (const header of csvHeaders) {
+            const normalizedHeader = normalizeString(header);
+            if (normalizedHeader === normalizedField) {
+                mapping[field] = header;
+                usedHeaders.add(header);
+                break;
+            }
+        }
+    }
+
+    // Second pass: similar matches
+    for (const field of appFields) {
+        if (mapping[field]) continue; // already matched
+
+        let bestMatch = null;
+        let bestScore = 0;
+
+        for (const header of csvHeaders) {
+            if (usedHeaders.has(header)) continue;
+
+            const score = stringSimilarity(field, header);
+            if (score > bestScore && score >= threshold) {
+                bestScore = score;
+                bestMatch = header;
+            }
+        }
+
+        if (bestMatch) {
+            mapping[field] = bestMatch;
+            usedHeaders.add(bestMatch);
+        }
+    }
+
+    return mapping;
 }
 
 /**
@@ -1450,9 +1543,10 @@ const APP = {
             } else { tbody.innerHTML = ''; }
         }
 
-        // Mapping fields
+        // Mapping fields with auto-mapping
         const allFields = getAllFields(tipo);
         const requiredFields = getRequiredFields(tipo);
+        const autoMapping = autoMapColumns(headers, allFields);
         clearChildren(fieldsContainer);
 
         for (const field of allFields) {
@@ -1479,6 +1573,9 @@ const APP = {
                 const opt = document.createElement('option');
                 opt.value = header;
                 opt.textContent = header;
+                if (autoMapping[field] === header) {
+                    opt.selected = true;
+                }
                 select.appendChild(opt);
             }
 
